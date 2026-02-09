@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 
 TOKEN = "8376333477:AAFi4gvsAxIu24xcFVDHgelnPuOgOlJIphg"
 ADMIN_ID = 7874316578
+USERS_AUTORISES = [7874316578, 5678348113]
 bot = telebot.TeleBot(TOKEN)
 
 @bot.message_handler(commands=['start'])
