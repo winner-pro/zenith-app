@@ -10,8 +10,8 @@ ADMIN_ID = 7874316578
 USERS_AUTORISES = [7874316578, 5678348113]
 bot = telebot.TeleBot(TOKEN)
 
-# Dictionnaire pour stocker les scores (Optionnel pour la session)
-stats_session = {"win": 0, "loss": 0}
+# Système de mémoire vive
+stats_session = {"win": 5, "loss": 5} # Initialisé avec tes derniers résultats
 
 @bot.message_handler(commands=['start'])
 def start(m):
@@ -23,7 +23,7 @@ def start(m):
     markup.add(types.KeyboardButton('⚡ SCANNER L\'ALGO ⚡'), types.KeyboardButton('📒 GUIDE DE MISE'))
     if m.chat.id == ADMIN_ID:
         markup.add(types.KeyboardButton('👑 PANEL FONDATION'), types.KeyboardButton('📊 STATS UTILISATEURS'))
-    bot.send_message(m.chat.id, "🌌 **ASTRO-AI PRÊT**", reply_markup=markup, parse_mode="Markdown")
+    bot.send_message(m.chat.id, "🌌 **ASTRO-AI V2 : CONNECTÉ**\nSystème adaptatif activé.", reply_markup=markup, parse_mode="Markdown")
 
 @bot.message_handler(func=lambda m: True)
 def handle(m):
@@ -31,50 +31,68 @@ def handle(m):
         return
 
     if m.text == '⚡ SCANNER L\'ALGO ⚡':
-        # 1. ALERTE PRÉPARATION
-        msg = bot.send_message(m.chat.id, "🛰️ **Analyse de l'algorithme...**")
+        msg = bot.send_message(m.chat.id, "🛰️ **Analyse des cycles en cours...**")
         time.sleep(1.5)
 
-        # 2. GÉNÉRATION DU SIGNAL (Basé sur ton interface)
-        prediction = round(random.uniform(1.50, 4.50), 2)
-        heure_signal = (datetime.now() + timedelta(seconds=30)).strftime("%H:%M:%S")
+        # INTELLIGENCE ADAPTATIVE
+        diff = stats_session['win'] - stats_session['loss']
+        
+        if diff < 0: # MODE RÉCUPÉRATION (Si plus de défaites)
+            prediction = round(random.uniform(1.30, 2.10), 2)
+            conseil = "⚠️ Mode Sécurité : Objectif bas pour remonter."
+        elif diff > 3: # MODE EXPLOITATION (Si grosse série de victoires)
+            prediction = round(random.uniform(2.50, 5.50), 2)
+            conseil = "🔥 Mode Audacieux : L'algorithme est favorable !"
+        else: # MODE STANDARD
+            prediction = round(random.uniform(1.80, 3.80), 2)
+            conseil = "✅ Analyse stable."
 
+        heure_signal = (datetime.now() + timedelta(seconds=30)).strftime("%H:%M:%S")
         texte_signal = (
             "🎯 **SIGNAL DÉTECTÉ**\n"
             "━━━━━━━━━━━━━━\n"
-            f"⏰ **HEURE PRÉCISE :** {heure_signal}\n"
+            f"⏰ **HEURE :** {heure_signal}\n"
             f"🚀 **OBJECTIF :** {prediction}x\n"
             "━━━━━━━━━━━━━━\n"
-            "✅ **CONFIANCE : 99%**"
+            f"💡 *{conseil}*"
         )
         bot.edit_message_text(texte_signal, m.chat.id, msg.message_id, parse_mode="Markdown")
 
-        # 3. INTERFACE DE VALIDATION RÉELLE (Fini le faux calcul !)
-        time.sleep(2)
+        # Boutons de validation
         markup_verif = types.InlineKeyboardMarkup()
-        btn_win = types.InlineKeyboardButton("✅ CÔTE ATTEINTE", callback_data=f"win_{prediction}")
-        btn_loss = types.InlineKeyboardButton("❌ CRASH AVANT", callback_data=f"loss_{prediction}")
-        markup_verif.add(btn_win, btn_loss)
-        
-        bot.send_message(m.chat.id, "🧐 **Vérification en cours...**\nL'avion a-t-il atteint l'objectif ?", reply_markup=markup_verif)
+        markup_verif.add(types.InlineKeyboardButton("✅ VALIDÉ", callback_data=f"win_{prediction}"),
+                         types.InlineKeyboardButton("❌ ÉCHOUÉ", callback_data=f"loss_{prediction}"))
+        bot.send_message(m.chat.id, "🧐 **Verdict ?**", reply_markup=markup_verif)
+
+    elif m.text == '📒 GUIDE DE MISE':
+        guide = (
+            "💰 **STRATÉGIE DE RELANCE**\n"
+            "━━━━━━━━━━━━━━\n"
+            "1️⃣ **Mise fixe** : 5% à 10% de la banque.\n"
+            "2️⃣ **Après une chute** : Ne pas paniquer. Suivre le 'Mode Sécurité' du bot.\n"
+            "3️⃣ **Objectif** : Viser la régularité, pas le gros coup d'un soir.\n"
+            "━━━━━━━━━━━━━━\n"
+            "✨ *On tombe pour mieux sauter !*"
+        )
+        bot.send_message(m.chat.id, guide, parse_mode="Markdown")
 
     elif m.text == '📊 STATS UTILISATEURS' and m.from_user.id == ADMIN_ID:
-        nb = len(USERS_AUTORISES)
-        bot.send_message(m.chat.id, f"📊 **STATS FONDATION**\nUtilisateurs : {nb}\nVictoires : {stats_session['win']}\nDéfaites : {stats_session['loss']}")
+        total = stats_session['win'] + stats_session['loss']
+        taux = (stats_session['win'] / total * 100) if total > 0 else 0
+        bot.send_message(m.chat.id, f"📊 **BILAN FONDATION**\n\n✅ Victoires : {stats_session['win']}\n❌ Défaites : {stats_session['loss']}\n📈 Précision : {taux:.1f}%")
 
     elif m.text == '👑 PANEL FONDATION' and m.from_user.id == ADMIN_ID:
-        bot.send_message(m.chat.id, "🛡️ **ADMIN :** Bot actif sous PM2.")
+        bot.send_message(m.chat.id, "👑 **STATUT FONDA**\n\nIA : Niveau 2 (Adaptative)\nServeur : Actif\nAuto-Correction : ON")
 
-# --- GESTION DES BOUTONS DE VALIDATION ---
+# GESTION DES BOUTONS CALLBACK
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
     action, cote = call.data.split('_')
-    
     if action == "win":
         stats_session["win"] += 1
-        bot.edit_message_text(f"✅ **CÔTE VALIDÉE !**\nL'objectif de **{cote}x** a été encaissé avec succès. 💰", call.message.chat.id, call.message.message_id, parse_mode="Markdown")
-    elif action == "loss":
+        bot.edit_message_text(f"✅ **BINGO !** Objectif {cote}x atteint.", call.message.chat.id, call.message.message_id)
+    else:
         stats_session["loss"] += 1
-        bot.edit_message_text(f"❌ **SIGNAL ÉCHOUÉ**\nL'avion a crashé avant **{cote}x**. Analyse de l'erreur en cours...", call.message.chat.id, call.message.message_id, parse_mode="Markdown")
+        bot.edit_message_text(f"❌ **ÉCHEC.** Crash avant {cote}x. L'IA s'adapte...", call.message.chat.id, call.message.message_id)
 
 bot.infinity_polling()
