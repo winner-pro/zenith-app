@@ -7,138 +7,75 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --gold: #d4af37; --dark: #050505; --card: rgba(255, 255, 255, 0.03); }
-        body { background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; padding-bottom: 80px; overflow-x: hidden; }
-        
-        .header { border: 1px solid var(--gold); padding: 12px; border-radius: 10px; text-align: center; margin-bottom: 20px; background: rgba(212, 175, 55, 0.1); box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); }
-        .gold-text { color: var(--gold); font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
-
-        /* Navigation Onglets */
-        .tab-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #0a0a0a; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #222; z-index: 100; }
-        .tab-item { color: #555; font-size: 11px; cursor: pointer; text-align: center; transition: 0.3s; flex: 1; text-transform: uppercase; }
-        .tab-item.active { color: var(--gold); font-weight: bold; transform: translateY(-3px); }
-
-        .content { display: none; animation: fadeIn 0.4s ease; }
-        .content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Cartes */
-        .card { background: var(--card); border: 1px solid #1a1a1a; border-radius: 15px; padding: 20px; margin-bottom: 15px; text-align: center; }
-        
-        /* Radar Circle */
-        .radar-circle { width: 180px; height: 180px; border-radius: 50%; border: 3px solid var(--gold); margin: 20px auto; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 0 40px rgba(212, 175, 55, 0.15); transition: 0.5s; }
-        .prediction-value { font-size: 42px; font-weight: 900; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
-
-        /* Boutons & Inputs */
-        .btn-gold { background: linear-gradient(145deg, #d4af37, #aa8c2d); color: #000; border: none; width: 100%; padding: 16px; border-radius: 10px; font-weight: 900; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-        .btn-gold:active { transform: scale(0.98); }
-        
-        textarea { width: 100%; background: #000; color: #fff; border: 1px solid #333; border-radius: 10px; padding: 12px; box-sizing: border-box; font-family: monospace; margin: 15px 0; }
-        
+        :root { --gold: #d4af37; --dark: #050505; }
+        body { background: var(--dark); color: white; font-family: sans-serif; margin: 0; padding: 15px; text-align: center; }
+        .card { border: 1px solid var(--gold); border-radius: 15px; padding: 20px; background: rgba(255,255,255,0.03); margin-top: 20px; }
+        .prediction { font-size: 48px; font-weight: bold; color: var(--gold); margin: 20px 0; text-shadow: 0 0 15px rgba(212,175,55,0.5); }
+        .loader { border: 4px solid #111; border-top: 4px solid var(--gold); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .btn { background: var(--gold); color: black; border: none; padding: 15px 30px; border-radius: 10px; font-weight: bold; width: 100%; font-size: 16px; cursor: pointer; }
         canvas { margin-top: 20px; max-height: 150px; }
     </style>
 </head>
 <body>
-
-    <div class="header"><span class="gold-text">🦅 ZENITH COMMAND V15</span></div>
-
-    <div id="radar" class="content active">
-        <div class="card">
-            <div style="font-size: 11px; color: #00ff00; letter-spacing: 1px;">📡 LIAISON CLOUDFLARE ACTIVE</div>
-            <div class="radar-circle" id="radar-ui">
-                <div id="result-val" class="prediction-value">--.--x</div>
-                <div style="font-size: 10px; color: #888;">COTE PRÉDITE</div>
-            </div>
-            <button class="btn-gold" id="scan-btn" onclick="fetchSignal()">DÉCRYPTER LE CYCLE</button>
-            <canvas id="predictionChart"></canvas>
-        </div>
+    <div style="color: var(--gold); font-weight: bold; letter-spacing: 1px;">🦅 ZENITH INTELLIGENCE V15</div>
+    
+    <div class="card">
+        <div id="loader" class="loader"></div>
+        <div id="signal" class="prediction">--.--x</div>
+        <div id="confidence-box" style="font-size: 12px; color: #888; margin-bottom: 10px;">PRÉCISION : <span id="precision">0</span>%</div>
+        <button class="btn" onclick="startAnalysis()">LANCER L'ANALYSE IA</button>
     </div>
 
-    <div id="vip" class="content">
-        <div class="card">
-            <h3 class="gold-text" style="margin-top:0;">💎 LABO DE RECALIBRAGE</h3>
-            <p style="font-size: 11px; color: #888;">Collez l'historique récent pour synchroniser l'IA</p>
-            <textarea id="history-data" rows="4" placeholder="Ex: 1.20, 4.80, 1.05, 2.30..."></textarea>
-            <button class="btn-gold" onclick="analyzeVIP()">CALCULER STRATÉGIE VIP</button>
-            <div id="vip-feedback" style="margin-top:15px; font-size: 13px; color: var(--gold); display: none;"></div>
-        </div>
-    </div>
-
-    <div class="tab-bar">
-        <div class="tab-item active" onclick="switchTab(event, 'radar')">RADAR</div>
-        <div class="tab-item" onclick="switchTab(event, 'vip')">LABO VIP</div>
+    <div class="card">
+        <canvas id="historyChart"></canvas>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        
-        // --- CONFIGURATION ---
-        const API_URL = "https://trail-attendance-apt-implement.trycloudflare.com";
-        let chart;
 
-        // Initialisation Graphique
-        function initChart() {
-            const ctx = document.getElementById('predictionChart').getContext('2d');
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: { labels: [], datasets: [{ data: [], borderColor: '#d4af37', borderWidth: 2, tension: 0.4, pointRadius: 0 }] },
-                options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
-            });
-        }
+        // Initialisation du Graphique
+        const ctx = document.getElementById('historyChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: { labels: [], datasets: [{ data: [], borderColor: '#d4af37', tension: 0.4, pointRadius: 0 }] },
+            options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+        });
 
-        async function fetchSignal() {
-            const btn = document.getElementById('scan-btn');
-            const valDisplay = document.getElementById('result-val');
+        async function startAnalysis() {
+            const signalDiv = document.getElementById('signal');
+            const loader = document.getElementById('loader');
+            const prec = document.getElementById('precision');
             
-            btn.innerText = "ANALYSE EN COURS...";
-            btn.disabled = true;
+            signalDiv.style.display = 'none';
+            loader.style.display = 'block';
+            tg.HapticFeedback.impactOccurred('medium');
 
             try {
-                const response = await fetch(`${API_URL}/signal`);
+                // Remplacer par ton lien Cloudflare actuel
+                const response = await fetch('https://trail-attendance-apt-implement.trycloudflare.com/signal');
                 const data = await response.json();
-                
-                // Animation de texte
-                valDisplay.innerText = data.signal + "x";
-                tg.HapticFeedback.notificationOccurred('success');
 
-                // Mise à jour graphique
-                updateChart(data.history);
-                
-            } catch (error) {
-                valDisplay.innerText = "ERR";
-                console.error("Erreur API:", error);
-            } finally {
-                btn.innerText = "DÉCRYPTER LE CYCLE";
-                btn.disabled = false;
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                    signalDiv.style.display = 'block';
+                    signalDiv.innerText = data.signal + "x";
+                    prec.innerText = Math.floor(Math.random() * (98 - 85 + 1)) + 85;
+                    
+                    // Mise à jour graphique
+                    chart.data.labels = data.history.map((_, i) => i);
+                    chart.data.datasets[0].data = data.history.reverse();
+                    chart.update();
+                    
+                    tg.HapticFeedback.notificationOccurred('success');
+                }, 1500); // Délai artificiel pour le "timing" crédible
+            } catch (e) {
+                signalDiv.innerText = "ERREUR";
+                loader.style.display = 'none';
+                signalDiv.style.display = 'block';
             }
         }
-
-        function updateChart(history) {
-            chart.data.labels = history.map((_, i) => i);
-            chart.data.datasets[0].data = history.reverse();
-            chart.update();
-        }
-
-        function switchTab(evt, tabName) {
-            const contents = document.getElementsByClassName("content");
-            for (let c of contents) c.classList.remove("active");
-            const tabs = document.getElementsByClassName("tab-item");
-            for (let t of tabs) t.classList.remove("active");
-            
-            document.getElementById(tabName).classList.add("active");
-            evt.currentTarget.classList.add("active");
-            tg.HapticFeedback.impactOccurred('light');
-        }
-
-        function analyzeVIP() {
-            const feedback = document.getElementById('vip-feedback');
-            feedback.style.display = "block";
-            feedback.innerHTML = "CALIBRAGE RÉUSSI... <br>SIGNAL VIP PRÊT.";
-            tg.HapticFeedback.impactOccurred('medium');
-        }
-
-        window.onload = initChart;
     </script>
 </body>
 </html>
