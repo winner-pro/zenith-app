@@ -3,101 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZENITH AI - V12 PREDICTOR</title>
+    <title>ZENITH AI - V13 LABORATOIRE VIP</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: #050505; color: #d4af37; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; margin: 0; padding: 15px; overflow-x: hidden; }
-        .header { border: 1px dashed #d4af37; padding: 10px; border-radius: 10px; margin-bottom: 15px; background: rgba(212, 175, 55, 0.05); font-size: 14px; }
-        .live-status { font-size: 12px; color: #00ff00; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-        
-        /* Live Feed Styling */
-        .live-feed { background: rgba(255, 255, 255, 0.05); height: 30px; border-radius: 20px; overflow: hidden; margin-bottom: 20px; display: flex; align-items: center; border: 1px solid #333; }
-        .feed-content { white-space: nowrap; animation: scroll 20s linear infinite; font-size: 11px; color: #aaa; }
-        @keyframes scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-
-        .progress-container { width: 100%; background: #111; border-radius: 20px; height: 12px; margin: 25px 0; display: none; border: 1px solid #444; }
-        .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #d4af37, #fff); border-radius: 20px; box-shadow: 0 0 15px #d4af37; transition: width 0.1s; }
-        
-        .prediction-box { background: radial-gradient(circle, rgba(212,175,55,0.2) 0%, rgba(0,0,0,1) 80%); border-radius: 50%; width: 180px; height: 180px; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 20px auto; border: 3px solid #d4af37; box-shadow: 0 0 40px rgba(212,175,55,0.4); display: none; }
-        .prediction-box span { font-size: 45px; font-weight: bold; text-shadow: 0 0 10px #000; }
-        .reliability { font-size: 12px; color: #00ff00; margin-top: -5px; }
-
-        .btn-scan { background: linear-gradient(145deg, #d4af37, #aa8c2d); color: #000; border: none; padding: 18px 40px; font-size: 18px; font-weight: 900; border-radius: 50px; cursor: pointer; text-transform: uppercase; box-shadow: 0 5px 15px rgba(212,175,55,0.4); transition: 0.3s; }
-        .btn-scan:active { transform: scale(0.95); }
+        body { background: #050505; color: #d4af37; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; padding: 15px; }
+        .header { border: 1px solid #d4af37; padding: 10px; border-radius: 10px; margin-bottom: 15px; background: rgba(212, 175, 55, 0.05); }
+        .vip-section { border: 2px solid #d4af37; border-radius: 15px; padding: 15px; background: linear-gradient(145deg, #111, #000); margin-top: 20px; box-shadow: 0 0 20px rgba(212, 175, 55, 0.2); }
+        h2 { font-size: 16px; text-transform: uppercase; letter-spacing: 2px; margin-top: 0; }
+        textarea { width: 90%; height: 80px; background: #000; color: #fff; border: 1px solid #444; border-radius: 8px; padding: 10px; font-family: monospace; margin-bottom: 10px; }
+        .btn-vip { background: #d4af37; color: #000; border: none; padding: 12px 25px; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%; }
+        .result-panel { margin-top: 15px; padding: 10px; background: rgba(0,255,0,0.05); border-radius: 8px; display: none; text-align: left; font-size: 13px; }
+        .danger { color: #ff4444; }
+        .success { color: #00ff00; }
+        .warning { color: #ffbb00; }
+        .info-label { color: #888; font-size: 11px; }
     </style>
 </head>
 <body>
-    <div class="header">🦅 ZENITH INTELLIGENCE V12<br>SYSTÈME DE PRÉDICTION PRIVÉ</div>
-    
-    <div class="live-status">🟢 <span id="online-count">1,244</span> SNIPERS EN LIGNE</div>
+    <div class="header">🦅 ZENITH COMMAND V13<br><span style="font-size:10px;">UNITÉ D'ANALYSE TACTIQUE</span></div>
 
-    <div class="live-feed">
-        <div class="feed-content" id="feed-text">
-            Mise à jour du flux... Signal 8.42x validé ✅ ... Signal 2.10x validé ✅ ... Signal 15.01x validé ✅ ... Analyse du cycle 1win...
+    <div class="vip-section">
+        <h2>💎 LABORATOIRE VIP</h2>
+        <p style="font-size: 11px; color: #aaa;">Collez les 5 à 20 dernières cotes (ex: 1.50, 2.10, 1.02...)</p>
+        <textarea id="history-input" placeholder="1.20, 4.50, 1.05, 2.80..."></textarea>
+        <button class="btn-vip" onclick="analyzeVIP()">CALCULER STRATÉGIE</button>
+
+        <div id="vip-results" class="result-panel">
+            <div id="market-status"></div>
+            <hr style="border: 0.5px solid #333;">
+            <div id="prediction-output"></div>
+            <div id="risk-management" style="margin-top:10px; font-style: italic; color: #fff;"></div>
         </div>
-    </div>
-
-    <div id="main-ui">
-        <button class="btn-scan" onclick="startAnalysis()">OBTENIR SIGNAL</button>
-        <p style="font-size: 10px; color:#666; margin-top:15px;">SYNCHRONISATION SATELLITE : 42ms</p>
-    </div>
-
-    <div id="processing" style="display:none;">
-        <div style="font-size:13px; color:#d4af37;" id="status-text">INITIALISATION...</div>
-        <div class="progress-container" id="p-cont"><div class="progress-bar" id="p-bar"></div></div>
-    </div>
-
-    <div class="prediction-box" id="result-box">
-        <span id="cote-val">--.--x</span>
-        <div class="reliability">FIABILITÉ 98%</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Animation du compteur de snipers
-        setInterval(() => {
-            const count = document.getElementById('online-count');
-            let current = parseInt(count.innerText.replace(',', ''));
-            count.innerText = (current + Math.floor(Math.random() * 5 - 2)).toLocaleString();
-        }, 3000);
-
-        function startAnalysis() {
-            const statusMsgs = ["SCAN DU FLUX 1WIN...", "DÉTECTION CYCLE...", "CALCUL TIMING...", "VERROUILLAGE !"];
-            const ui = document.getElementById('main-ui');
-            const proc = document.getElementById('processing');
-            const bar = document.getElementById('p-bar');
-            const statusTxt = document.getElementById('status-text');
-            const result = document.getElementById('result-box');
-
-            ui.style.display = 'none';
-            result.style.display = 'none';
-            proc.style.display = 'block';
-            document.getElementById('p-cont').style.display = 'block';
-
-            let width = 0;
-            let msgIdx = 0;
-            const interval = setInterval(() => {
-                width += 1;
-                bar.style.width = width + '%';
-                if(width % 25 === 0) { statusTxt.innerText = statusMsgs[msgIdx]; msgIdx++; }
-                if(width >= 100) { clearInterval(interval); showResult(); }
-            }, 40);
-        }
-
-        function showResult() {
-            document.getElementById('processing').style.display = 'none';
-            const resBox = document.getElementById('result-box');
-            const coteVal = document.getElementById('cote-val');
-            const cote = (Math.random() * (12.0 - 1.4) + 1.4).toFixed(2);
-            coteVal.innerText = cote + "x";
-            resBox.style.display = 'flex';
-            tg.HapticFeedback.notificationOccurred('success');
+        function analyzeVIP() {
+            const input = document.getElementById('history-input').value;
+            const results = document.getElementById('vip-results');
             
-            setTimeout(() => {
-                document.getElementById('main-ui').style.display = 'block';
-            }, 5000);
+            // Nettoyage des données (on extrait les chiffres)
+            const cotes = input.split(/[,\s]+/).map(Number).filter(n => !isNaN(n));
+
+            if (cotes.length < 3) {
+                alert("Veuillez entrer au moins 3 cotes pour une analyse fiable.");
+                return;
+            }
+
+            results.style.display = 'block';
+            tg.HapticFeedback.impactOccurred('medium');
+
+            const lastCotes = cotes.slice(-5); // Analyse des 5 dernières
+            const average = lastCotes.reduce((a, b) => a + b, 0) / lastCotes.length;
+            const lowCotes = lastCotes.filter(c => c < 1.5).length;
+
+            let statusHTML = "";
+            let predHTML = "";
+            let riskHTML = "";
+
+            // LOGIQUE DE DÉTECTION DE CYCLE
+            if (lowCotes >= 3) {
+                statusHTML = "<b class='danger'>🚨 ÉTAT DU MARCHÉ : RÉCUPÉRATION (FROID)</b><br><span class='info-label'>Le casino récupère les gains. Risque de crash à 1.0x élevé.</span>";
+                predHTML = "🎯 PRÉDICTION : <span class='danger'>AUCUN SIGNAL</span>";
+                riskHTML = "🛡️ CONSEIL : Ne jouez pas. Attendez 3 tours > 2.00x avant de reprendre.";
+            } else if (average > 3) {
+                statusHTML = "<b class='success'>🔥 ÉTAT DU MARCHÉ : DISTRIBUTION (CHAUD)</b><br><span class='info-label'>Cycle favorable détecté. Les algorithmes libèrent des cotes.</span>";
+                predHTML = "🎯 PRÉDICTION : <b>1.80x - 2.50x</b>";
+                riskHTML = "💰 STRATÉGIE : Mise agressive (5% du capital). Encaissement auto à 1.50x pour sécuriser.";
+            } else {
+                statusHTML = "<b class='warning'>⚖️ ÉTAT DU MARCHÉ : STABLE / NEUTRE</b><br><span class='info-label'>Flux régulier sans anomalie détectée.</span>";
+                predHTML = "🎯 PRÉDICTION : <b>1.30x - 1.50x</b>";
+                riskHTML = "🛡️ STRATÉGIE : Mise prudente (2% du capital). Ne cherchez pas les gros multiplicateurs.";
+            }
+
+            document.getElementById('market-status').innerHTML = statusHTML;
+            document.getElementById('prediction-output').innerHTML = predHTML;
+            document.getElementById('risk-management').innerText = riskHTML;
         }
     </script>
 </body>
