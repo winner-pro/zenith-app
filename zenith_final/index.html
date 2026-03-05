@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZENITH AI - V12 PREDICTOR</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { background: #050505; color: #d4af37; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; margin: 0; padding: 15px; overflow-x: hidden; }
+        .header { border: 1px dashed #d4af37; padding: 10px; border-radius: 10px; margin-bottom: 15px; background: rgba(212, 175, 55, 0.05); font-size: 14px; }
+        .live-status { font-size: 12px; color: #00ff00; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        
+        /* Live Feed Styling */
+        .live-feed { background: rgba(255, 255, 255, 0.05); height: 30px; border-radius: 20px; overflow: hidden; margin-bottom: 20px; display: flex; align-items: center; border: 1px solid #333; }
+        .feed-content { white-space: nowrap; animation: scroll 20s linear infinite; font-size: 11px; color: #aaa; }
+        @keyframes scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+
+        .progress-container { width: 100%; background: #111; border-radius: 20px; height: 12px; margin: 25px 0; display: none; border: 1px solid #444; }
+        .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #d4af37, #fff); border-radius: 20px; box-shadow: 0 0 15px #d4af37; transition: width 0.1s; }
+        
+        .prediction-box { background: radial-gradient(circle, rgba(212,175,55,0.2) 0%, rgba(0,0,0,1) 80%); border-radius: 50%; width: 180px; height: 180px; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 20px auto; border: 3px solid #d4af37; box-shadow: 0 0 40px rgba(212,175,55,0.4); display: none; }
+        .prediction-box span { font-size: 45px; font-weight: bold; text-shadow: 0 0 10px #000; }
+        .reliability { font-size: 12px; color: #00ff00; margin-top: -5px; }
+
+        .btn-scan { background: linear-gradient(145deg, #d4af37, #aa8c2d); color: #000; border: none; padding: 18px 40px; font-size: 18px; font-weight: 900; border-radius: 50px; cursor: pointer; text-transform: uppercase; box-shadow: 0 5px 15px rgba(212,175,55,0.4); transition: 0.3s; }
+        .btn-scan:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+    <div class="header">🦅 ZENITH INTELLIGENCE V12<br>SYSTÈME DE PRÉDICTION PRIVÉ</div>
+    
+    <div class="live-status">🟢 <span id="online-count">1,244</span> SNIPERS EN LIGNE</div>
+
+    <div class="live-feed">
+        <div class="feed-content" id="feed-text">
+            Mise à jour du flux... Signal 8.42x validé ✅ ... Signal 2.10x validé ✅ ... Signal 15.01x validé ✅ ... Analyse du cycle 1win...
+        </div>
+    </div>
+
+    <div id="main-ui">
+        <button class="btn-scan" onclick="startAnalysis()">OBTENIR SIGNAL</button>
+        <p style="font-size: 10px; color:#666; margin-top:15px;">SYNCHRONISATION SATELLITE : 42ms</p>
+    </div>
+
+    <div id="processing" style="display:none;">
+        <div style="font-size:13px; color:#d4af37;" id="status-text">INITIALISATION...</div>
+        <div class="progress-container" id="p-cont"><div class="progress-bar" id="p-bar"></div></div>
+    </div>
+
+    <div class="prediction-box" id="result-box">
+        <span id="cote-val">--.--x</span>
+        <div class="reliability">FIABILITÉ 98%</div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // Animation du compteur de snipers
+        setInterval(() => {
+            const count = document.getElementById('online-count');
+            let current = parseInt(count.innerText.replace(',', ''));
+            count.innerText = (current + Math.floor(Math.random() * 5 - 2)).toLocaleString();
+        }, 3000);
+
+        function startAnalysis() {
+            const statusMsgs = ["SCAN DU FLUX 1WIN...", "DÉTECTION CYCLE...", "CALCUL TIMING...", "VERROUILLAGE !"];
+            const ui = document.getElementById('main-ui');
+            const proc = document.getElementById('processing');
+            const bar = document.getElementById('p-bar');
+            const statusTxt = document.getElementById('status-text');
+            const result = document.getElementById('result-box');
+
+            ui.style.display = 'none';
+            result.style.display = 'none';
+            proc.style.display = 'block';
+            document.getElementById('p-cont').style.display = 'block';
+
+            let width = 0;
+            let msgIdx = 0;
+            const interval = setInterval(() => {
+                width += 1;
+                bar.style.width = width + '%';
+                if(width % 25 === 0) { statusTxt.innerText = statusMsgs[msgIdx]; msgIdx++; }
+                if(width >= 100) { clearInterval(interval); showResult(); }
+            }, 40);
+        }
+
+        function showResult() {
+            document.getElementById('processing').style.display = 'none';
+            const resBox = document.getElementById('result-box');
+            const coteVal = document.getElementById('cote-val');
+            const cote = (Math.random() * (12.0 - 1.4) + 1.4).toFixed(2);
+            coteVal.innerText = cote + "x";
+            resBox.style.display = 'flex';
+            tg.HapticFeedback.notificationOccurred('success');
+            
+            setTimeout(() => {
+                document.getElementById('main-ui').style.display = 'block';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
