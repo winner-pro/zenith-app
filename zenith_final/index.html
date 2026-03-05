@@ -3,92 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZENITH PRESTIGE V14</title>
+    <title>ZENITH V15 ULTRA</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --gold: #d4af37; --dark: #0a0a0a; --glass: rgba(255, 255, 255, 0.05); }
-        body { background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 70px; }
+        :root { --gold: #d4af37; --dark: #050505; --card: rgba(255, 255, 255, 0.03); }
+        body { background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; padding-bottom: 80px; overflow-x: hidden; }
         
-        /* Menu Onglets */
-        .tab-bar { position: fixed; bottom: 0; width: 100%; background: #111; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--gold); z-index: 100; }
-        .tab-item { color: #666; font-size: 10px; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
-        .tab-item.active { color: var(--gold); font-weight: bold; }
+        .header { border: 1px solid var(--gold); padding: 12px; border-radius: 10px; text-align: center; margin-bottom: 20px; background: rgba(212, 175, 55, 0.1); box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); }
+        .gold-text { color: var(--gold); font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
 
-        .content { display: none; padding: 20px; animation: fadeIn 0.5s; }
+        /* Navigation Onglets */
+        .tab-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #0a0a0a; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #222; z-index: 100; }
+        .tab-item { color: #555; font-size: 11px; cursor: pointer; text-align: center; transition: 0.3s; flex: 1; text-transform: uppercase; }
+        .tab-item.active { color: var(--gold); font-weight: bold; transform: translateY(-3px); }
+
+        .content { display: none; animation: fadeIn 0.4s ease; }
         .content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Design Cartes */
-        .card { background: var(--glass); border: 1px solid #333; border-radius: 15px; padding: 15px; margin-bottom: 15px; backdrop-filter: blur(10px); }
-        .gold-text { color: var(--gold); font-weight: bold; }
+        /* Cartes */
+        .card { background: var(--card); border: 1px solid #1a1a1a; border-radius: 15px; padding: 20px; margin-bottom: 15px; text-align: center; }
         
-        .btn-gold { background: var(--gold); color: black; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: 900; margin-top: 10px; }
-        textarea { width: 100%; background: #000; color: #fff; border: 1px solid #444; border-radius: 8px; padding: 10px; box-sizing: border-box; }
+        /* Radar Circle */
+        .radar-circle { width: 180px; height: 180px; border-radius: 50%; border: 3px solid var(--gold); margin: 20px auto; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 0 40px rgba(212, 175, 55, 0.15); transition: 0.5s; }
+        .prediction-value { font-size: 42px; font-weight: 900; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+
+        /* Boutons & Inputs */
+        .btn-gold { background: linear-gradient(145deg, #d4af37, #aa8c2d); color: #000; border: none; width: 100%; padding: 16px; border-radius: 10px; font-weight: 900; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        .btn-gold:active { transform: scale(0.98); }
         
-        .status-dot { height: 8px; width: 8px; background: #00ff00; border-radius: 50%; display: inline-block; margin-right: 5px; box-shadow: 0 0 10px #00ff00; }
+        textarea { width: 100%; background: #000; color: #fff; border: 1px solid #333; border-radius: 10px; padding: 12px; box-sizing: border-box; font-family: monospace; margin: 15px 0; }
+        
+        canvas { margin-top: 20px; max-height: 150px; }
     </style>
 </head>
 <body>
 
+    <div class="header"><span class="gold-text">🦅 ZENITH COMMAND V15</span></div>
+
     <div id="radar" class="content active">
-        <h2 class="gold-text">🦅 RADAR ZENITH</h2>
         <div class="card">
-            <div style="font-size: 12px;"><span class="status-dot"></span> SYNC. SERVEUR: <span class="gold-text">ACTIF</span></div>
-            <div style="font-size: 24px; margin: 20px 0;">PRÊT POUR SCAN</div>
-            <button class="btn-gold" onclick="alert('Scan lancé...')">LANCER SCAN ÉLITE</button>
-        </div>
-        <div class="card" style="font-size: 11px; color: #888;">
-            DERNIER SIGNAL : <span class="gold-text">14.50x ✅</span> (Il y a 2 min)
+            <div style="font-size: 11px; color: #00ff00; letter-spacing: 1px;">📡 LIAISON CLOUDFLARE ACTIVE</div>
+            <div class="radar-circle" id="radar-ui">
+                <div id="result-val" class="prediction-value">--.--x</div>
+                <div style="font-size: 10px; color: #888;">COTE PRÉDITE</div>
+            </div>
+            <button class="btn-gold" id="scan-btn" onclick="fetchSignal()">DÉCRYPTER LE CYCLE</button>
+            <canvas id="predictionChart"></canvas>
         </div>
     </div>
 
     <div id="vip" class="content">
-        <h2 class="gold-text">💎 LABORATOIRE VIP</h2>
         <div class="card">
-            <p style="font-size: 12px;">INJECTEUR DE DONNÉES HISTORIQUES</p>
-            <textarea id="history" rows="4" placeholder="Ex: 1.20, 5.40, 1.05..."></textarea>
-            <button class="btn-gold" onclick="alert('Analyse en cours...')">ANALYSER LE CYCLE</button>
-        </div>
-    </div>
-
-    <div id="account" class="content">
-        <h2 class="gold-text">👤 MON DASHBOARD</h2>
-        <div class="card">
-            <div style="display: flex; justify-content: space-between;">
-                <span>STATUT :</span>
-                <span class="gold-text">MEMBRE VIP</span>
-            </div>
-            <div style="margin-top: 10px; height: 5px; background: #333; border-radius: 5px;">
-                <div style="width: 70%; height: 100%; background: var(--gold); border-radius: 5px;"></div>
-            </div>
-            <p style="font-size: 10px; color: #888;">Validité : 22 jours restants</p>
-        </div>
-        <div class="card">
-            <p style="font-size: 12px;">REVENUS SIMULÉS : <span class="gold-text">145,000 XOF</span></p>
+            <h3 class="gold-text" style="margin-top:0;">💎 LABO DE RECALIBRAGE</h3>
+            <p style="font-size: 11px; color: #888;">Collez l'historique récent pour synchroniser l'IA</p>
+            <textarea id="history-data" rows="4" placeholder="Ex: 1.20, 4.80, 1.05, 2.30..."></textarea>
+            <button class="btn-gold" onclick="analyzeVIP()">CALCULER STRATÉGIE VIP</button>
+            <div id="vip-feedback" style="margin-top:15px; font-size: 13px; color: var(--gold); display: none;"></div>
         </div>
     </div>
 
     <div class="tab-bar">
-        <div class="tab-item active" onclick="openTab(event, 'radar')">Radar</div>
-        <div class="tab-item" onclick="openTab(event, 'vip')">Labo VIP</div>
-        <div class="tab-item" onclick="openTab(event, 'account')">Dashboard</div>
+        <div class="tab-item active" onclick="switchTab(event, 'radar')">RADAR</div>
+        <div class="tab-item" onclick="switchTab(event, 'vip')">LABO VIP</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+        
+        // --- CONFIGURATION ---
+        const API_URL = "https://trail-attendance-apt-implement.trycloudflare.com";
+        let chart;
 
-        function openTab(evt, tabName) {
-            let i, content, tabLinks;
-            content = document.getElementsByClassName("content");
-            for (i = 0; i < content.length; i++) { content[i].style.display = "none"; content[i].classList.remove("active"); }
-            tabLinks = document.getElementsByClassName("tab-item");
-            for (i = 0; i < tabLinks.length; i++) { tabLinks[i].classList.remove("active"); }
-            document.getElementById(tabName).style.display = "block";
+        // Initialisation Graphique
+        function initChart() {
+            const ctx = document.getElementById('predictionChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: [], datasets: [{ data: [], borderColor: '#d4af37', borderWidth: 2, tension: 0.4, pointRadius: 0 }] },
+                options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+            });
+        }
+
+        async function fetchSignal() {
+            const btn = document.getElementById('scan-btn');
+            const valDisplay = document.getElementById('result-val');
+            
+            btn.innerText = "ANALYSE EN COURS...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/signal`);
+                const data = await response.json();
+                
+                // Animation de texte
+                valDisplay.innerText = data.signal + "x";
+                tg.HapticFeedback.notificationOccurred('success');
+
+                // Mise à jour graphique
+                updateChart(data.history);
+                
+            } catch (error) {
+                valDisplay.innerText = "ERR";
+                console.error("Erreur API:", error);
+            } finally {
+                btn.innerText = "DÉCRYPTER LE CYCLE";
+                btn.disabled = false;
+            }
+        }
+
+        function updateChart(history) {
+            chart.data.labels = history.map((_, i) => i);
+            chart.data.datasets[0].data = history.reverse();
+            chart.update();
+        }
+
+        function switchTab(evt, tabName) {
+            const contents = document.getElementsByClassName("content");
+            for (let c of contents) c.classList.remove("active");
+            const tabs = document.getElementsByClassName("tab-item");
+            for (let t of tabs) t.classList.remove("active");
+            
             document.getElementById(tabName).classList.add("active");
             evt.currentTarget.classList.add("active");
             tg.HapticFeedback.impactOccurred('light');
         }
+
+        function analyzeVIP() {
+            const feedback = document.getElementById('vip-feedback');
+            feedback.style.display = "block";
+            feedback.innerHTML = "CALIBRAGE RÉUSSI... <br>SIGNAL VIP PRÊT.";
+            tg.HapticFeedback.impactOccurred('medium');
+        }
+
+        window.onload = initChart;
     </script>
 </body>
 </html>
+
