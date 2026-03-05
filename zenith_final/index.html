@@ -3,84 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZENITH AI - V13 LABORATOIRE VIP</title>
+    <title>ZENITH PRESTIGE V14</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: #050505; color: #d4af37; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; padding: 15px; }
-        .header { border: 1px solid #d4af37; padding: 10px; border-radius: 10px; margin-bottom: 15px; background: rgba(212, 175, 55, 0.05); }
-        .vip-section { border: 2px solid #d4af37; border-radius: 15px; padding: 15px; background: linear-gradient(145deg, #111, #000); margin-top: 20px; box-shadow: 0 0 20px rgba(212, 175, 55, 0.2); }
-        h2 { font-size: 16px; text-transform: uppercase; letter-spacing: 2px; margin-top: 0; }
-        textarea { width: 90%; height: 80px; background: #000; color: #fff; border: 1px solid #444; border-radius: 8px; padding: 10px; font-family: monospace; margin-bottom: 10px; }
-        .btn-vip { background: #d4af37; color: #000; border: none; padding: 12px 25px; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%; }
-        .result-panel { margin-top: 15px; padding: 10px; background: rgba(0,255,0,0.05); border-radius: 8px; display: none; text-align: left; font-size: 13px; }
-        .danger { color: #ff4444; }
-        .success { color: #00ff00; }
-        .warning { color: #ffbb00; }
-        .info-label { color: #888; font-size: 11px; }
+        :root { --gold: #d4af37; --dark: #0a0a0a; --glass: rgba(255, 255, 255, 0.05); }
+        body { background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 70px; }
+        
+        /* Menu Onglets */
+        .tab-bar { position: fixed; bottom: 0; width: 100%; background: #111; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--gold); z-index: 100; }
+        .tab-item { color: #666; font-size: 10px; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
+        .tab-item.active { color: var(--gold); font-weight: bold; }
+
+        .content { display: none; padding: 20px; animation: fadeIn 0.5s; }
+        .content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Design Cartes */
+        .card { background: var(--glass); border: 1px solid #333; border-radius: 15px; padding: 15px; margin-bottom: 15px; backdrop-filter: blur(10px); }
+        .gold-text { color: var(--gold); font-weight: bold; }
+        
+        .btn-gold { background: var(--gold); color: black; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: 900; margin-top: 10px; }
+        textarea { width: 100%; background: #000; color: #fff; border: 1px solid #444; border-radius: 8px; padding: 10px; box-sizing: border-box; }
+        
+        .status-dot { height: 8px; width: 8px; background: #00ff00; border-radius: 50%; display: inline-block; margin-right: 5px; box-shadow: 0 0 10px #00ff00; }
     </style>
 </head>
 <body>
-    <div class="header">🦅 ZENITH COMMAND V13<br><span style="font-size:10px;">UNITÉ D'ANALYSE TACTIQUE</span></div>
 
-    <div class="vip-section">
-        <h2>💎 LABORATOIRE VIP</h2>
-        <p style="font-size: 11px; color: #aaa;">Collez les 5 à 20 dernières cotes (ex: 1.50, 2.10, 1.02...)</p>
-        <textarea id="history-input" placeholder="1.20, 4.50, 1.05, 2.80..."></textarea>
-        <button class="btn-vip" onclick="analyzeVIP()">CALCULER STRATÉGIE</button>
-
-        <div id="vip-results" class="result-panel">
-            <div id="market-status"></div>
-            <hr style="border: 0.5px solid #333;">
-            <div id="prediction-output"></div>
-            <div id="risk-management" style="margin-top:10px; font-style: italic; color: #fff;"></div>
+    <div id="radar" class="content active">
+        <h2 class="gold-text">🦅 RADAR ZENITH</h2>
+        <div class="card">
+            <div style="font-size: 12px;"><span class="status-dot"></span> SYNC. SERVEUR: <span class="gold-text">ACTIF</span></div>
+            <div style="font-size: 24px; margin: 20px 0;">PRÊT POUR SCAN</div>
+            <button class="btn-gold" onclick="alert('Scan lancé...')">LANCER SCAN ÉLITE</button>
         </div>
+        <div class="card" style="font-size: 11px; color: #888;">
+            DERNIER SIGNAL : <span class="gold-text">14.50x ✅</span> (Il y a 2 min)
+        </div>
+    </div>
+
+    <div id="vip" class="content">
+        <h2 class="gold-text">💎 LABORATOIRE VIP</h2>
+        <div class="card">
+            <p style="font-size: 12px;">INJECTEUR DE DONNÉES HISTORIQUES</p>
+            <textarea id="history" rows="4" placeholder="Ex: 1.20, 5.40, 1.05..."></textarea>
+            <button class="btn-gold" onclick="alert('Analyse en cours...')">ANALYSER LE CYCLE</button>
+        </div>
+    </div>
+
+    <div id="account" class="content">
+        <h2 class="gold-text">👤 MON DASHBOARD</h2>
+        <div class="card">
+            <div style="display: flex; justify-content: space-between;">
+                <span>STATUT :</span>
+                <span class="gold-text">MEMBRE VIP</span>
+            </div>
+            <div style="margin-top: 10px; height: 5px; background: #333; border-radius: 5px;">
+                <div style="width: 70%; height: 100%; background: var(--gold); border-radius: 5px;"></div>
+            </div>
+            <p style="font-size: 10px; color: #888;">Validité : 22 jours restants</p>
+        </div>
+        <div class="card">
+            <p style="font-size: 12px;">REVENUS SIMULÉS : <span class="gold-text">145,000 XOF</span></p>
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <div class="tab-item active" onclick="openTab(event, 'radar')">Radar</div>
+        <div class="tab-item" onclick="openTab(event, 'vip')">Labo VIP</div>
+        <div class="tab-item" onclick="openTab(event, 'account')">Dashboard</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        function analyzeVIP() {
-            const input = document.getElementById('history-input').value;
-            const results = document.getElementById('vip-results');
-            
-            // Nettoyage des données (on extrait les chiffres)
-            const cotes = input.split(/[,\s]+/).map(Number).filter(n => !isNaN(n));
-
-            if (cotes.length < 3) {
-                alert("Veuillez entrer au moins 3 cotes pour une analyse fiable.");
-                return;
-            }
-
-            results.style.display = 'block';
-            tg.HapticFeedback.impactOccurred('medium');
-
-            const lastCotes = cotes.slice(-5); // Analyse des 5 dernières
-            const average = lastCotes.reduce((a, b) => a + b, 0) / lastCotes.length;
-            const lowCotes = lastCotes.filter(c => c < 1.5).length;
-
-            let statusHTML = "";
-            let predHTML = "";
-            let riskHTML = "";
-
-            // LOGIQUE DE DÉTECTION DE CYCLE
-            if (lowCotes >= 3) {
-                statusHTML = "<b class='danger'>🚨 ÉTAT DU MARCHÉ : RÉCUPÉRATION (FROID)</b><br><span class='info-label'>Le casino récupère les gains. Risque de crash à 1.0x élevé.</span>";
-                predHTML = "🎯 PRÉDICTION : <span class='danger'>AUCUN SIGNAL</span>";
-                riskHTML = "🛡️ CONSEIL : Ne jouez pas. Attendez 3 tours > 2.00x avant de reprendre.";
-            } else if (average > 3) {
-                statusHTML = "<b class='success'>🔥 ÉTAT DU MARCHÉ : DISTRIBUTION (CHAUD)</b><br><span class='info-label'>Cycle favorable détecté. Les algorithmes libèrent des cotes.</span>";
-                predHTML = "🎯 PRÉDICTION : <b>1.80x - 2.50x</b>";
-                riskHTML = "💰 STRATÉGIE : Mise agressive (5% du capital). Encaissement auto à 1.50x pour sécuriser.";
-            } else {
-                statusHTML = "<b class='warning'>⚖️ ÉTAT DU MARCHÉ : STABLE / NEUTRE</b><br><span class='info-label'>Flux régulier sans anomalie détectée.</span>";
-                predHTML = "🎯 PRÉDICTION : <b>1.30x - 1.50x</b>";
-                riskHTML = "🛡️ STRATÉGIE : Mise prudente (2% du capital). Ne cherchez pas les gros multiplicateurs.";
-            }
-
-            document.getElementById('market-status').innerHTML = statusHTML;
-            document.getElementById('prediction-output').innerHTML = predHTML;
-            document.getElementById('risk-management').innerText = riskHTML;
+        function openTab(evt, tabName) {
+            let i, content, tabLinks;
+            content = document.getElementsByClassName("content");
+            for (i = 0; i < content.length; i++) { content[i].style.display = "none"; content[i].classList.remove("active"); }
+            tabLinks = document.getElementsByClassName("tab-item");
+            for (i = 0; i < tabLinks.length; i++) { tabLinks[i].classList.remove("active"); }
+            document.getElementById(tabName).style.display = "block";
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+            tg.HapticFeedback.impactOccurred('light');
         }
     </script>
 </body>
