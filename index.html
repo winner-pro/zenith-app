@@ -1,129 +1,85 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZENITH EMPIRE V10</title>
-
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-<style>
-
-body{
-background:#0f0f0f;
-color:gold;
-font-family:sans-serif;
-text-align:center;
-margin:0;
-padding:0;
-}
-
-header{
-padding:20px;
-font-size:1.5em;
-font-weight:bold;
-letter-spacing:2px;
-}
-
-.card{
-border:2px solid gold;
-border-radius:15px;
-margin:20px;
-padding:25px;
-background:#1a1a1a;
-box-shadow:0 0 20px rgba(255,215,0,0.3);
-}
-
-.signal{
-font-size:3.5em;
-font-weight:bold;
-text-shadow:0 0 15px gold;
-animation:pulse 2s infinite;
-}
-
-@keyframes pulse{
-0%{transform:scale(1)}
-50%{transform:scale(1.1)}
-100%{transform:scale(1)}
-}
-
-.timer{
-color:#ff4444;
-font-size:1.2em;
-margin-top:10px;
-}
-
-.status{
-color:#00ff88;
-font-size:0.9em;
-margin-top:10px;
-}
-
-button{
-background:gold;
-color:black;
-border:none;
-padding:15px 30px;
-border-radius:10px;
-font-weight:bold;
-margin:10px;
-}
-
-.refresh{
-background:#00ccff;
-}
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZENITH AI - V11</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { background: #050505; color: #d4af37; font-family: 'Courier New', Courier, monospace; text-align: center; margin: 0; padding: 20px; }
+        .header { border: 1px solid #d4af37; padding: 10px; border-radius: 5px; margin-bottom: 20px; background: rgba(212, 175, 55, 0.05); }
+        .progress-container { width: 100%; background: #222; border-radius: 10px; height: 10px; margin: 20px 0; display: none; overflow: hidden; }
+        .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #d4af37, #fff); transition: width 0.1s; }
+        .log-box { font-size: 12px; color: #aaa; height: 40px; margin: 10px 0; }
+        .prediction-box { background: radial-gradient(circle, rgba(212,175,55,0.15) 0%, rgba(0,0,0,1) 100%); border-radius: 50%; width: 200px; height: 200px; line-height: 200px; margin: 20px auto; border: 2px solid #d4af37; font-size: 40px; font-weight: bold; box-shadow: 0 0 30px #d4af37; display: none; }
+        .btn-ai { background: transparent; color: #d4af37; border: 2px solid #d4af37; padding: 15px 30px; font-size: 16px; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
+        .btn-ai:hover { background: #d4af37; color: #000; }
+    </style>
 </head>
-
 <body>
+    <div class="header">🦅 ZENITH INTELLIGENCE V11<br><small>RADAR SITE WEB : CONNECTÉ</small></div>
+    
+    <div id="main-ui">
+        <p style="color:white;">SYSTÈME D'ANALYSE PRÉDICTIF</p>
+        <button class="btn-ai" onclick="runAI()">Lancer l'Analyse IA</button>
+    </div>
 
-<header>🦅 ZENITH COMMAND</header>
+    <div id="processing" style="display:none;">
+        <div class="log-box" id="ai-logs">Initialisation du flux...</div>
+        <div class="progress-container" id="p-cont"><div class="progress-bar" id="p-bar"></div></div>
+    </div>
 
-<div class="card">
+    <div class="prediction-box" id="result-box">--.--x</div>
 
-<div>📡 COTE PRÉDITE</div>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
 
-<div class="signal" id="val">--x</div>
+        function runAI() {
+            const logs = ["Scan des 100 dernières cotes...", "Calcul des probabilités...", "Analyse des cycles de perte...", "Détection Zone Chaude...", "Cote identifiée !"];
+            const ui = document.getElementById('main-ui');
+            const proc = document.getElementById('processing');
+            const bar = document.getElementById('p-bar');
+            const logBox = document.getElementById('ai-logs');
+            const result = document.getElementById('result-box');
+            const pCont = document.getElementById('p-cont');
 
-<div class="timer" id="wait">Connexion au moteur IA...</div>
+            ui.style.display = 'none';
+            result.style.display = 'none';
+            proc.style.display = 'block';
+            pCont.style.display = 'block';
+            
+            let width = 0;
+            let logIndex = 0;
 
-<div class="status" id="status">ANALYSE EN COURS...</div>
+            const interval = setInterval(() => {
+                width += 2;
+                bar.style.width = width + '%';
+                
+                if (width % 20 === 0 && logIndex < logs.length) {
+                    logBox.innerText = logs[logIndex];
+                    logIndex++;
+                }
 
-</div>
+                if (width >= 100) {
+                    clearInterval(interval);
+                    showResult();
+                }
+            }, 50);
+        }
 
-<button class="refresh" onclick="simulate()">🔄 ACTUALISER</button>
-
-<button onclick="Telegram.WebApp.close()">❌ QUITTER</button>
-
-<script>
-
-let tg = window.Telegram.WebApp;
-tg.expand();
-
-function updateSignal(value,time,status){
-
-document.getElementById("val").innerText=value+"x";
-document.getElementById("wait").innerText="Fenêtre : "+time;
-document.getElementById("status").innerText=status;
-
-tg.HapticFeedback.notificationOccurred("success");
-
-}
-
-function simulate(){
-
-let value=(Math.random()*10+1).toFixed(2);
-let time=Math.floor(Math.random()*30)+"s";
-let status="SIGNAL VALIDÉ";
-
-updateSignal(value,time,status);
-
-}
-
-setTimeout(simulate,2000);
-
-</script>
-
+        function showResult() {
+            document.getElementById('processing').style.display = 'none';
+            const resBox = document.getElementById('result-box');
+            const cote = (Math.random() * (8.50 - 1.30) + 1.30).toFixed(2);
+            resBox.innerText = cote + "x";
+            resBox.style.display = 'block';
+            tg.HapticFeedback.notificationOccurred('success');
+            
+            setTimeout(() => {
+                document.getElementById('main-ui').style.display = 'block';
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
